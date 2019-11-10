@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 
 def has_green_pixels(img):
@@ -9,11 +10,13 @@ def has_green_pixels(img):
     return 255 in cv2.inRange(hsv, hsv_l, hsv_h)
 
 
-num = 5
-dim = 15
+num = 40
 threshold = 4
 top = 96  # android notification bar in xxxhdpi
 left = 0
+path = os.path.join(os.getcwd(), str(num))
+if not os.path.exists(path):
+    os.mkdir(path)
 img = cv2.imread("nonogram" + str(num) + ".png")
 outImg = img
 
@@ -78,6 +81,8 @@ binary = cv2.threshold(gray, 50, 250, cv2.THRESH_BINARY)[1]
 cv2.imwrite("gray" + str(num) + ".png", gray)
 cv2.imwrite("binary" + str(num) + ".png", binary)
 
+
+# do not combine two digits, treat as separate digits for ML
 for xindex in range(len(xborders)):
     x = xborders[xindex]
     y = yborders[0]
@@ -103,24 +108,24 @@ for xindex in range(len(xborders)):
         has_green = has_green_pixels(crop_num)
         if has_green:
             crop_num = gray[top + yb:top + yb + hb, x + xb: x + xb + wb]
-            cv2.imwrite("cropped{}_top_{}_{}.png".format(num, xindex, index), crop_num)
+            cv2.imwrite(os.path.join(path, 'top_{}_{}_single.png'.format(xindex, index)), crop_num)
             print(xindex, index, '\t', xb, yb, wb, hb, x, y, has_green)
             index = index + 1
         else:
             if ub:  # exists unpaired digit
                 if ub[0] < xb:
-                    wb = xb + wb - ub[0]
-                    xb = ub[0]
-                    yb = max(ub[1], yb)
-                    hb = max(ub[3], hb)
+                    (xbl, ybl, wbl, hbl) = ub
+                    xbr, ybr, wbr, hbr = xb, yb, wb, hb
                 else:
-                    wb = ub[0] + ub[2] - xb
-                    yb = max(ub[1], yb)
-                    hb = max(ub[3], hb)
+                    xbl, ybl, wbl, hbl = xb, yb, wb, hb
+                    (xbr, ybr, wbr, hbr) = ub
                 ub = []
-                crop_num = gray[top + yb:top + yb + hb, x + xb: x + xb + wb]
-                cv2.imwrite("cropped{}_top_{}_{}.png".format(num, xindex, index), crop_num)
-                print(xindex, index, '\t', xb, yb, wb, hb, x, y, has_green)
+                crop_num = gray[top + ybl:top + ybl + hbl, x + xbl: x + xbl + wbl]
+                cv2.imwrite(os.path.join(path, 'top_{}_{}_left.png'.format(xindex, index)), crop_num)
+                print(xindex, index, '\t', xbl, ybl, wbl, hbl, x, y, has_green)
+                crop_num = gray[top + ybr:top + ybr + hbr, x + xbr: x + xbr + wbr]
+                cv2.imwrite(os.path.join(path, 'top_{}_{}_right.png'.format(xindex, index)), crop_num)
+                print(xindex, index, '\t', xbr, ybr, wbr, hbr, x, y, has_green)
                 index = index + 1
             else:
                 ub = [xb, yb, wb, hb]
@@ -146,19 +151,20 @@ for yindex in range(len(yborders)):
         has_green = has_green_pixels(crop_num)
         if has_green:
             crop_num = gray[y + yb:y + yb + hb, left + xb: left + xb + wb]
-            cv2.imwrite("cropped{}_left_{}_{}.png".format(num, yindex, index), crop_num)
+            cv2.imwrite(os.path.join(path, 'left_{}_{}_single.png'.format(yindex, index)), crop_num)
             print(yindex, index, '\t', xb, yb, wb, hb, x, y, has_green)
             index = index + 1
         else:
             if ub:  # exists unpaired digit
-                wb = xb + wb - ub[0]
-                xb = ub[0]
-                yb = max(ub[1], yb)
-                hb = max(ub[3], hb)
+                (xbl, ybl, wbl, hbl) = ub
+                xbr, ybr, wbr, hbr = xb, yb, wb, hb
                 ub = []
-                crop_num = gray[y + yb:y + yb + hb, left + xb: left + xb + wb]
-                cv2.imwrite("cropped{}_left_{}_{}.png".format(num, yindex, index), crop_num)
-                print(yindex, index, '\t', xb, yb, wb, hb, x, y, has_green)
+                crop_num = gray[y + ybl:y + ybl + hbl, left + xbl: left + xbl + wbl]
+                cv2.imwrite(os.path.join(path, 'left_{}_{}_left.png'.format(yindex, index)), crop_num)
+                print(xindex, index, '\t', xbl, ybl, wbl, hbl, x, y, has_green)
+                crop_num = gray[y + ybr:y + ybr + hbr, left + xbr: left + xbr + wbr]
+                cv2.imwrite(os.path.join(path, 'left_{}_{}_right.png'.format(yindex, index)), crop_num)
+                print(xindex, index, '\t', xbr, ybr, wbr, hbr, x, y, has_green)
                 index = index + 1
             else:
                 ub = [xb, yb, wb, hb]
