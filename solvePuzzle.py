@@ -121,4 +121,6 @@ def solveFile(num):
     solve(open(puzzleFile).read().split('\n'))
 
 
-solveFile(40)
+if __name__ == "__main__":
+    num = input("Please provide the nonogram number and check that nonogram png file exists (i.e. nonogram12.png): ")
+    solveFile(num)

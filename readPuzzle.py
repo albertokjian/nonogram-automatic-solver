@@ -209,5 +209,3 @@ def createBoardString(num):
                 array.append(string)
             print(" ".join(array), file=text_file)
     return puzzleFile
-
-createBoardString(40)
