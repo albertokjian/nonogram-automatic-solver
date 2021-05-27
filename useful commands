@@ -1,0 +1,8 @@
+Setup Wireless ADB Connection
+adb kill-server
+adb usb
+adb tcpip 5555 #unplug
+adb connect DEVICE_ADDRESS:5555
+
+Screenshot
+adb exec-out screencap -p > nonogram1.png
