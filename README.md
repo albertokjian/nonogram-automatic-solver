@@ -46,8 +46,10 @@ Unique solution.
 ### Image Processing
 I need to parse the horizontal and vertical number labels seen on the left and top of the screenshot. 
 <img src="nonogram40.png" alt="nonogram40" width="400"/>
+
 This is done by doing a houghline transform to find the approximate pixels of each row/column
 <img src="houghlines40.png" alt="houghlines40" width="400"/>
+
 Then in order to improve computer vision result, I transform this file to a binary color.
 <img src="binary40.png" alt="binary40" width="400"/>
 
